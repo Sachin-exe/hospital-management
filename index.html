@@ -6,189 +6,230 @@
   <title>Hospital Management System</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    .navbar-brand, .nav-link { color: #0d6efd !important; }
-    th, td { text-align: center; vertical-align: middle; }
-    td[contenteditable="true"] { background-color: #f0f8ff; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+    }
+    header {
+      background-color: #007bff;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    nav {
+      background-color: #ffffff;
+      padding: 10px;
+      display: flex;
+      gap: 20px;
+      border-bottom: 2px solid #007bff;
+      justify-content: center;
+    }
+    nav a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 4px;
+    }
+    nav a:hover {
+      background-color: #007bff;
+      color: white;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #e9ecef;
+    }
+    td[contenteditable="true"] {
+      background-color: #f0f8ff;
+    }
+    .btn {
+      margin-bottom: 10px;
+    }
+    .tab-section {
+      display: none;
+    }
+    .tab-section.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
+  <header>Hospital Management System</header>
+  <nav>
+    <a href="#" onclick="showSection('patients')">Patients</a>
+    <a href="#" onclick="showSection('doctors')">Doctors</a>
+    <a href="#" onclick="showSection('departments')">Departments</a>
+  </nav>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Hospital Management System</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="#patients">Patients</a></li>
-        <li class="nav-item"><a class="nav-link" href="#doctors">Doctors</a></li>
-        <li class="nav-item"><a class="nav-link" href="#departments">Departments</a></li>
-      </ul>
+  <div class="container">
+    <div id="patients" class="tab-section active">
+      <h3>Patients</h3>
+      <button class="btn btn-primary" onclick="addPatient()">Add Patient</button>
+      <button class="btn btn-success" onclick="savePatients()">Save Patients</button>
+      <table id="patientTable">
+        <thead>
+          <tr><th>Bed</th><th>Status</th><th>Name</th><th>Diagnosis</th><th>Height</th><th>Weight</th><th>Temp</th><th>BP</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="doctors" class="tab-section">
+      <h3>Doctors</h3>
+      <button class="btn btn-primary" onclick="addDoctor()">Add Doctor</button>
+      <button class="btn btn-success" onclick="saveDoctors()">Save Doctors</button>
+      <table id="doctorTable">
+        <thead>
+          <tr><th>Name</th><th>Department</th><th>Experience</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="departments" class="tab-section">
+      <h3>Departments</h3>
+      <button class="btn btn-primary" onclick="addDepartment()">Add Department</button>
+      <button class="btn btn-success" onclick="saveDepartments()">Save Departments</button>
+      <table id="departmentTable">
+        <thead>
+          <tr><th>Department</th><th>Head</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
-</nav>
 
-<div class="container mt-4">
-  <div id="patients">
-    <h3>Patients</h3>
-    <button class="btn btn-primary mb-2" onclick="addPatient()">Add Patient</button>
-    <button class="btn btn-success mb-2" onclick="savePatients()">Save Patients</button>
-    <table class="table table-bordered" id="patientTable">
-      <thead><tr><th>Bed</th><th>Status</th><th>Name</th><th>Diagnosis</th><th>Height</th><th>Weight</th><th>Temp (°C)</th><th>BP</th><th>Action</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div id="doctors">
-    <h3>Doctors</h3>
-    <button class="btn btn-primary mb-2" onclick="addDoctor()">Add Doctor</button>
-    <button class="btn btn-success mb-2" onclick="saveDoctors()">Save Doctors</button>
-    <table class="table table-bordered" id="doctorTable">
-      <thead><tr><th>Name</th><th>Department</th><th>Experience</th><th>Action</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div id="departments">
-    <h3>Departments</h3>
-    <button class="btn btn-primary mb-2" onclick="addDepartment()">Add Department</button>
-    <button class="btn btn-success mb-2" onclick="saveDepartments()">Save Departments</button>
-    <table class="table table-bordered" id="departmentTable">
-      <thead><tr><th>Department</th><th>Head</th><th>Action</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Login Modal -->
-<div class="modal fade" id="loginModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Login</h5>
-      </div>
-      <div class="modal-body">
-        <input id="email" class="form-control mb-2" type="email" placeholder="Email">
-        <input id="password" class="form-control mb-2" type="password" placeholder="Password">
-        <button class="btn btn-primary" onclick="login()">Login</button>
+  <!-- Login Modal -->
+  <div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Login</h5>
+        </div>
+        <div class="modal-body">
+          <input id="email" class="form-control mb-2" type="email" placeholder="Email">
+          <input id="password" class="form-control mb-2" type="password" placeholder="Password">
+          <button class="btn btn-primary" onclick="login()">Login</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBd4Mz9Yayx5PrZWoAszcu95TxMMRB9bOU",
-    authDomain: "hospital-management-d803f.firebaseapp.com",
-    projectId: "hospital-management-d803f",
-    storageBucket: "hospital-management-d803f.firebasestorage.app",
-    messagingSenderId: "404354361635",
-    appId: "1:404354361635:web:cbbdba7cfa51b65c0cc496"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd4Mz9Yayx5PrZWoAszcu95TxMMRB9bOU",
+      authDomain: "hospital-management-d803f.firebaseapp.com",
+      projectId: "hospital-management-d803f",
+      storageBucket: "hospital-management-d803f.appspot.com",
+      messagingSenderId: "404354361635",
+      appId: "1:404354361635:web:cbbdba7cfa51b65c0cc496"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore();
-  const auth = getAuth();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore();
+    const auth = getAuth();
 
-  function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => location.reload())
-      .catch(err => alert(err.message));
-  }
-
-  onAuthStateChanged(auth, user => {
-    const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-    if (!user) {
-      new bootstrap.Modal(document.getElementById('loginModal')).show();
-    } else {
-      if (loginModal) loginModal.hide();
+    window.login = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => location.reload())
+        .catch(err => alert(err.message));
     }
-  });
 
-  window.addPatient = function () {
-    const row = `<tr>
-      <td contenteditable="true">Room 1 - Bed ?</td>
-      <td contenteditable="true">available</td>
-      <td contenteditable="true">New Patient</td>
-      <td contenteditable="true">Diagnosis</td>
-      <td contenteditable="true">1.70</td>
-      <td contenteditable="true">65</td>
-      <td contenteditable="true">37.0</td>
-      <td contenteditable="true">120/80</td>
-      <td><button class='btn btn-danger btn-sm' onclick='this.closest("tr").remove()'>Delete</button></td>
-    </tr>`;
-    document.querySelector("#patientTable tbody").insertAdjacentHTML("beforeend", row);
-  }
+    onAuthStateChanged(auth, async (user) => {
+      const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+      if (!user) {
+        new bootstrap.Modal(document.getElementById('loginModal')).show();
+      } else {
+        if (loginModal) loginModal.hide();
+        loadPatients();
+      }
+    });
 
-  window.addDoctor = function () {
-    const row = `<tr>
-      <td contenteditable="true">Dr. New</td>
-      <td contenteditable="true">Department</td>
-      <td contenteditable="true">Experience</td>
-      <td><button class='btn btn-danger btn-sm' onclick='this.closest("tr").remove()'>Delete</button></td>
-    </tr>`;
-    document.querySelector("#doctorTable tbody").insertAdjacentHTML("beforeend", row);
-  }
+    async function loadPatients() {
+      const querySnapshot = await getDocs(collection(db, "patients"));
+      const tableBody = document.querySelector("#patientTable tbody");
+      tableBody.innerHTML = "";
+      querySnapshot.forEach(docSnap => {
+        const p = docSnap.data();
+        const row = `<tr>
+          <td contenteditable="true">${p.bed}</td>
+          <td contenteditable="true">${p.status}</td>
+          <td contenteditable="true">${p.name}</td>
+          <td contenteditable="true">${p.diagnosis}</td>
+          <td contenteditable="true">${p.height}</td>
+          <td contenteditable="true">${p.weight}</td>
+          <td contenteditable="true">${p.temp}</td>
+          <td contenteditable="true">${p.bp}</td>
+          <td><button class='btn btn-danger btn-sm' onclick='this.closest("tr").remove()'>Delete</button></td>
+        </tr>`;
+        tableBody.insertAdjacentHTML("beforeend", row);
+      });
+    }
 
-  window.addDepartment = function () {
-    const row = `<tr>
-      <td contenteditable="true">New Department</td>
-      <td contenteditable="true">Head Name</td>
-      <td><button class='btn btn-danger btn-sm' onclick='this.closest("tr").remove()'>Delete</button></td>
-    </tr>`;
-    document.querySelector("#departmentTable tbody").insertAdjacentHTML("beforeend", row);
-  }
+    window.addPatient = function () {
+      const row = `<tr>
+        <td contenteditable="true">Room ? - Bed ?</td>
+        <td contenteditable="true">available</td>
+        <td contenteditable="true">New Patient</td>
+        <td contenteditable="true">Diagnosis</td>
+        <td contenteditable="true">1.70</td>
+        <td contenteditable="true">65</td>
+        <td contenteditable="true">37.0</td>
+        <td contenteditable="true">120/80</td>
+        <td><button class='btn btn-danger btn-sm' onclick='this.closest("tr").remove()'>Delete</button></td>
+      </tr>`;
+      document.querySelector("#patientTable tbody").insertAdjacentHTML("beforeend", row);
+    }
 
-  window.savePatients = async function () {
-    const rows = document.querySelectorAll("#patientTable tbody tr");
-    await Promise.all(Array.from(rows).map((row, index) => {
-      const cells = row.querySelectorAll("td");
-      const data = {
-        bed: cells[0].innerText,
-        status: cells[1].innerText,
-        name: cells[2].innerText,
-        diagnosis: cells[3].innerText,
-        height: cells[4].innerText,
-        weight: cells[5].innerText,
-        temp: cells[6].innerText,
-        bp: cells[7].innerText
-      };
-      return setDoc(doc(db, "patients", "row_" + index), data);
-    }));
-    alert("Patients saved.");
-  }
+    window.savePatients = async function () {
+      const rows = document.querySelectorAll("#patientTable tbody tr");
+      await Promise.all(Array.from(rows).map((row, index) => {
+        const cells = row.querySelectorAll("td");
+        const data = {
+          bed: cells[0].innerText,
+          status: cells[1].innerText,
+          name: cells[2].innerText,
+          diagnosis: cells[3].innerText,
+          height: cells[4].innerText,
+          weight: cells[5].innerText,
+          temp: cells[6].innerText,
+          bp: cells[7].innerText
+        };
+        return setDoc(doc(db, "patients", "row_" + index), data);
+      }));
+      alert("Patients saved.");
+    }
 
-  window.saveDoctors = async function () {
-    const rows = document.querySelectorAll("#doctorTable tbody tr");
-    await Promise.all(Array.from(rows).map((row, index) => {
-      const cells = row.querySelectorAll("td");
-      const data = {
-        name: cells[0].innerText,
-        department: cells[1].innerText,
-        experience: cells[2].innerText
-      };
-      return setDoc(doc(db, "doctors", "row_" + index), data);
-    }));
-    alert("Doctors saved.");
-  }
+    window.showSection = function (id) {
+      document.querySelectorAll(".tab-section").forEach(div => div.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+  </script>
 
-  window.saveDepartments = async function () {
-    const rows = document.querySelectorAll("#departmentTable tbody tr");
-    await Promise.all(Array.from(rows).map((row, index) => {
-      const cells = row.querySelectorAll("td");
-      const data = {
-        department: cells[0].innerText,
-        head: cells[1].innerText
-      };
-      return setDoc(doc(db, "departments", "row_" + index), data);
-    }));
-    alert("Departments saved.");
-  }
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
