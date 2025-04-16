@@ -9,50 +9,48 @@
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
     }
     header {
       background-color: #007bff;
       color: white;
-      padding: 15px;
+      padding: 15px 20px;
       font-size: 24px;
       font-weight: bold;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-left: 20px;
-      padding-right: 20px;
     }
     .sidebar {
-      background-color: #f8f9fa;
-      width: 250px;
+      width: 220px;
       height: 100vh;
       position: fixed;
-      top: 60px;
+      top: 70px;
       left: 0;
-      border-right: 1px solid #ccc;
+      background-color: #f8f9fa;
       padding: 20px;
+      border-right: 1px solid #ccc;
     }
     .sidebar a {
       display: block;
-      margin-bottom: 15px;
+      padding: 10px;
+      margin-bottom: 10px;
       color: #007bff;
       font-weight: bold;
       text-decoration: none;
     }
-    .sidebar input[type="search"] {
+    .sidebar input[type="text"] {
+      margin-bottom: 20px;
       width: 100%;
       padding: 5px;
-      margin-bottom: 15px;
     }
     .content {
-      margin-left: 270px;
+      margin-left: 240px;
       padding: 20px;
+      padding-top: 90px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
     }
     th, td {
       border: 1px solid #ccc;
@@ -62,38 +60,38 @@
     td[contenteditable="true"] {
       background-color: #f0f8ff;
     }
-    .btn {
-      margin-right: 10px;
-    }
-    footer {
-      background-color: black;
+    .footer {
+      background: #000;
       color: white;
-      text-align: center;
       padding: 10px;
+      text-align: center;
       position: fixed;
       width: 100%;
       bottom: 0;
+    }
+    .username {
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <header>
     <div>Hospital Management System</div>
-    <div>
-      <span id="userEmail" style="margin-right: 10px;"></span>
-      <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+    <div class="username">
+      <span id="userId"></span>
+      <button class="btn btn-light btn-sm" onclick="logout()">Logout</button>
     </div>
   </header>
 
   <div class="sidebar">
-    <input type="search" id="searchInput" placeholder="Search Patients/Doctors..." oninput="searchDatabase()">
-    <a href="?page=patients">Patients</a>
-    <a href="?page=doctors">Doctors</a>
-    <a href="?page=departments">Departments</a>
+    <input type="text" id="searchBox" placeholder="Search..." onkeyup="searchData()">
+    <a href="patients.html">Patients</a>
+    <a href="doctors.html">Doctors</a>
+    <a href="departments.html">Departments</a>
   </div>
 
-  <div class="content" id="mainContent">
-    <!-- Dynamic content loads here -->
+  <div class="content">
+    <p>Welcome to Hospital Management System. Use the sidebar to navigate.</p>
   </div>
 
   <!-- Login Modal -->
@@ -104,21 +102,19 @@
           <h5 class="modal-title">Login</h5>
         </div>
         <div class="modal-body">
-          <input id="email" class="form-control mb-2" type="email" placeholder="Enter your email">
-          <input id="password" class="form-control mb-2" type="password" placeholder="Enter your password">
+          <input id="email" class="form-control mb-2" type="email" placeholder="Email">
+          <input id="password" class="form-control mb-2" type="password" placeholder="Password">
           <button class="btn btn-primary" onclick="login()">Login</button>
         </div>
       </div>
     </div>
   </div>
 
-  <footer>
-    Made by SUVEDITA
-  </footer>
+  <div class="footer">Made by SUVEDITA</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, setDoc, doc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -134,42 +130,31 @@
     const db = getFirestore();
     const auth = getAuth();
 
-    function login() {
+    window.login = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       signInWithEmailAndPassword(auth, email, password)
-        .then(() => location.reload())
+        .then(() => {
+          bootstrap.Modal.getInstance(document.getElementById("loginModal")).hide();
+        })
         .catch(err => alert(err.message));
     }
 
-    function logout() {
+    window.logout = function () {
       signOut(auth).then(() => location.reload());
     }
 
-    function searchDatabase() {
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      const items = document.querySelectorAll("#mainContent tbody tr");
-      items.forEach(row => {
-        row.style.display = Array.from(row.children).some(td => td.innerText.toLowerCase().includes(search)) ? '' : 'none';
-      });
-    }
-
-    function loadPage(page) {
-      fetch(`pages/${page}.html`).then(res => res.text()).then(html => {
-        document.getElementById("mainContent").innerHTML = html;
-        import(`./pages/${page}.js`).then(module => module.initPage(db));
-      });
+    window.searchData = async function () {
+      const searchValue = document.getElementById("searchBox").value.toLowerCase();
+      console.log("Search: ", searchValue);
+      // Custom searching can be added based on loaded table content
     }
 
     onAuthStateChanged(auth, (user) => {
-      const loginModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('loginModal'));
       if (!user) {
-        loginModal.show();
+        new bootstrap.Modal(document.getElementById("loginModal")).show();
       } else {
-        loginModal.hide();
-        document.getElementById("userEmail").textContent = user.email;
-        const urlParams = new URLSearchParams(window.location.search);
-        loadPage(urlParams.get('page') || 'patients');
+        document.getElementById("userId").textContent = user.email;
       }
     });
   </script>
