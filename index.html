@@ -1,48 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hospital Management System</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f6f9;
     }
     header {
       background-color: #007bff;
       color: white;
       padding: 15px;
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    nav {
-      background-color: #ffffff;
-      padding: 10px;
       display: flex;
-      gap: 20px;
-      border-bottom: 2px solid #007bff;
-      justify-content: center;
+      justify-content: space-between;
+      align-items: center;
     }
-    nav a {
+    header h1 {
+      font-size: 24px;
+      margin: 0;
+    }
+    header .user-info {
+      font-size: 14px;
+    }
+    #sidebar {
+      background-color: #f8f9fa;
+      padding: 20px;
+      width: 200px;
+      height: 100vh;
+      position: fixed;
+      border-right: 1px solid #ccc;
+    }
+    #sidebar a {
+      display: block;
+      padding: 10px;
       color: #007bff;
       text-decoration: none;
       font-weight: bold;
-      padding: 5px 10px;
-      border-radius: 4px;
     }
-    nav a:hover {
-      background-color: #007bff;
-      color: white;
+    #sidebar input {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
     }
-    .container {
-      background: white;
+    #main-content {
+      margin-left: 220px;
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin-top: 20px;
     }
     table {
       width: 100%;
@@ -54,33 +58,27 @@
       padding: 10px;
       text-align: center;
     }
-    th {
-      background-color: #e9ecef;
-    }
     td[contenteditable="true"] {
       background-color: #f0f8ff;
-    }
-    .btn {
-      margin-bottom: 10px;
-    }
-    .tab-section {
-      display: none;
-    }
-    .tab-section.active {
-      display: block;
     }
   </style>
 </head>
 <body>
-  <header>Hospital Management System</header>
-  <nav>
-    <a href="#" onclick="showSection('patients')">Patients</a>
-    <a href="#" onclick="showSection('doctors')">Doctors</a>
-    <a href="#" onclick="showSection('departments')">Departments</a>
-  </nav>
-
-  <div class="container">
-    <div id="patients" class="tab-section active">
+  <header>
+    <h1>Hospital Management System</h1>
+    <div class="user-info">
+      <span id="user-email"></span>
+      <button class="btn btn-sm btn-light" onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <div id="sidebar">
+    <input type="text" placeholder="Search..." />
+    <a href="#patients">Patients</a>
+    <a href="#doctors">Doctors</a>
+    <a href="#departments">Departments</a>
+  </div>
+  <div id="main-content">
+    <div id="patients">
       <h3>Patients</h3>
       <button class="btn btn-primary" onclick="addPatient()">Add Patient</button>
       <button class="btn btn-success" onclick="savePatients()">Save Patients</button>
@@ -92,7 +90,7 @@
       </table>
     </div>
 
-    <div id="doctors" class="tab-section">
+    <div id="doctors">
       <h3>Doctors</h3>
       <button class="btn btn-primary" onclick="addDoctor()">Add Doctor</button>
       <button class="btn btn-success" onclick="saveDoctors()">Save Doctors</button>
@@ -104,7 +102,7 @@
       </table>
     </div>
 
-    <div id="departments" class="tab-section">
+    <div id="departments">
       <h3>Departments</h3>
       <button class="btn btn-primary" onclick="addDepartment()">Add Department</button>
       <button class="btn btn-success" onclick="saveDepartments()">Save Departments</button>
@@ -135,8 +133,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBd4Mz9Yayx5PrZWoAszcu95TxMMRB9bOU",
@@ -155,59 +153,46 @@
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       signInWithEmailAndPassword(auth, email, password)
-        .then(() => location.reload())
+        .then(() => bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide())
         .catch(err => alert(err.message));
+    };
+
+    window.logout = function () {
+      signOut(auth).then(() => location.reload());
     }
 
     onAuthStateChanged(auth, async (user) => {
-      const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
       if (!user) {
         new bootstrap.Modal(document.getElementById('loginModal')).show();
       } else {
-        if (loginModal) loginModal.hide();
-        loadPatients();
+        document.getElementById('user-email').textContent = user.email;
+        await loadPatients();
+        await loadDoctors();
+        await loadDepartments();
       }
     });
 
-    async function loadPatients() {
-      const querySnapshot = await getDocs(collection(db, "patients"));
-      const tableBody = document.querySelector("#patientTable tbody");
-      tableBody.innerHTML = "";
-      querySnapshot.forEach(docSnap => {
-        const p = docSnap.data();
-        const row = `<tr>
-          <td contenteditable="true">${p.bed}</td>
-          <td contenteditable="true">${p.status}</td>
-          <td contenteditable="true">${p.name}</td>
-          <td contenteditable="true">${p.diagnosis}</td>
-          <td contenteditable="true">${p.height}</td>
-          <td contenteditable="true">${p.weight}</td>
-          <td contenteditable="true">${p.temp}</td>
-          <td contenteditable="true">${p.bp}</td>
-          <td><button class='btn btn-danger btn-sm' onclick='this.closest("tr").remove()'>Delete</button></td>
-        </tr>`;
-        tableBody.insertAdjacentHTML("beforeend", row);
+    function createRow(cells, tableId) {
+      const row = document.createElement("tr");
+      cells.forEach(text => {
+        const td = document.createElement("td");
+        td.textContent = text;
+        td.contentEditable = "true";
+        row.appendChild(td);
       });
+      const td = document.createElement("td");
+      td.innerHTML = `<button class='btn btn-danger btn-sm' onclick='this.closest("tr").remove()'>Delete</button>`;
+      row.appendChild(td);
+      document.querySelector(`#${tableId} tbody`).appendChild(row);
     }
 
-    window.addPatient = function () {
-      const row = `<tr>
-        <td contenteditable="true">Room ? - Bed ?</td>
-        <td contenteditable="true">available</td>
-        <td contenteditable="true">New Patient</td>
-        <td contenteditable="true">Diagnosis</td>
-        <td contenteditable="true">1.70</td>
-        <td contenteditable="true">65</td>
-        <td contenteditable="true">37.0</td>
-        <td contenteditable="true">120/80</td>
-        <td><button class='btn btn-danger btn-sm' onclick='this.closest("tr").remove()'>Delete</button></td>
-      </tr>`;
-      document.querySelector("#patientTable tbody").insertAdjacentHTML("beforeend", row);
-    }
+    window.addPatient = () => createRow(["Bed", "Status", "Name", "Diagnosis", "Height", "Weight", "Temp", "BP"], "patientTable");
+    window.addDoctor = () => createRow(["Name", "Department", "Experience"], "doctorTable");
+    window.addDepartment = () => createRow(["Department", "Head"], "departmentTable");
 
-    window.savePatients = async function () {
+    window.savePatients = async () => {
       const rows = document.querySelectorAll("#patientTable tbody tr");
-      await Promise.all(Array.from(rows).map((row, index) => {
+      await Promise.all(Array.from(rows).map((row, i) => {
         const cells = row.querySelectorAll("td");
         const data = {
           bed: cells[0].innerText,
@@ -219,17 +204,68 @@
           temp: cells[6].innerText,
           bp: cells[7].innerText
         };
-        return setDoc(doc(db, "patients", "row_" + index), data);
+        return setDoc(doc(db, "patients", "row_" + i), data);
       }));
       alert("Patients saved.");
+    };
+
+    window.saveDoctors = async () => {
+      const rows = document.querySelectorAll("#doctorTable tbody tr");
+      await Promise.all(Array.from(rows).map((row, i) => {
+        const cells = row.querySelectorAll("td");
+        const data = {
+          name: cells[0].innerText,
+          department: cells[1].innerText,
+          experience: cells[2].innerText
+        };
+        return setDoc(doc(db, "doctors", "row_" + i), data);
+      }));
+      alert("Doctors saved.");
+    };
+
+    window.saveDepartments = async () => {
+      const rows = document.querySelectorAll("#departmentTable tbody tr");
+      await Promise.all(Array.from(rows).map((row, i) => {
+        const cells = row.querySelectorAll("td");
+        const data = {
+          department: cells[0].innerText,
+          head: cells[1].innerText
+        };
+        return setDoc(doc(db, "departments", "row_" + i), data);
+      }));
+      alert("Departments saved.");
+    };
+
+    async function loadPatients() {
+      const querySnapshot = await getDocs(collection(db, "patients"));
+      const tableBody = document.querySelector("#patientTable tbody");
+      tableBody.innerHTML = "";
+      querySnapshot.forEach(docSnap => {
+        const p = docSnap.data();
+        createRow([p.bed, p.status, p.name, p.diagnosis, p.height, p.weight, p.temp, p.bp], "patientTable");
+      });
     }
 
-    window.showSection = function (id) {
-      document.querySelectorAll(".tab-section").forEach(div => div.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
+    async function loadDoctors() {
+      const querySnapshot = await getDocs(collection(db, "doctors"));
+      const tableBody = document.querySelector("#doctorTable tbody");
+      tableBody.innerHTML = "";
+      querySnapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        createRow([d.name, d.department, d.experience], "doctorTable");
+      });
+    }
+
+    async function loadDepartments() {
+      const querySnapshot = await getDocs(collection(db, "departments"));
+      const tableBody = document.querySelector("#departmentTable tbody");
+      tableBody.innerHTML = "";
+      querySnapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        createRow([d.department, d.head], "departmentTable");
+      });
     }
   </script>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
